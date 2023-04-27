@@ -37,7 +37,7 @@ jobs:
         run: npm ci
   second:
     runs-on: ubuntu-latest
-    needs: [ first ]
+    needs: [ cache-key, first ]
     steps:
       - name: Get code # code checkout from repo
         uses: actions/checkout@v3
