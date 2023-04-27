@@ -32,7 +32,7 @@ jobs:
           ACTIVE_KEY=${{ needs.cache-key.outputs.key }}
           echo "ACTIVE_KEY: $ACTIVE_KEY"
           echo "Fetching list of cache key"
-          cacheKeys=$(gh actions-cache list)
+          cacheKeys=$(gh actions-cache list | cut -f 1)
           echo "cacheKeys: $cacheKeys"
           echo "Deleting caches..."
           for cacheKey in $cacheKeys
