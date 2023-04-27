@@ -1,0 +1,86 @@
+name: Cache-Hit-and-Cleanup
+
+on: workflow_dispatch
+
+env:
+  WORKFLOW_MARKER: my
+
+jobs:
+  cache-key:
+    runs-on: ubuntu-latest
+    outputs:
+      key: ${{ steps.key.outputs.CACHE_KEY }}
+    steps:
+      - name: Get code # code checkout from repo
+        uses: actions/checkout@v3
+      - name: Compute Key
+        id: key
+        run: echo "CACHE_KEY=${{ env.WORKFLOW_MARKER}}-deps-node-modules-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
+      - name: Show Key
+        run: |
+          echo "Cache-Key: ${{ steps.key.outputs.CACHE_KEY }}"
+  first:
+    runs-on: ubuntu-latest
+    needs: [ cache-key ]
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+      - name: Get code # code checkout from repo
+        uses: actions/checkout@v3
+      - name: Show key
+        run: echo "${{ needs.cache-key.outputs.key }}"
+      - name: Cache dependencies # caches the node_modules folder in cache if the package-lock.json file changed
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ needs.cache-key.outputs.key }}
+      - name: Show cache-hit
+        run: |
+          echo "Cache-Hit: ${{ steps.cache.outputs.cache-hit }}"
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true' # will be executed only if the node_modules changed in cache
+        run: npm ci
+  second:
+    runs-on: ubuntu-latest
+    needs: [ cache-key, first ]
+    steps:
+      - name: Get code # code checkout from repo
+        uses: actions/checkout@v3
+      - name: Cache dependencies # caches the node_modules folder in cache if the package-lock.json file changed
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ needs.cache-key.outputs.key }}
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true' # will be executed only if the node_modules changed in cache
+        run: npm ci
+  cache-cleanup:
+    runs-on: ubuntu-latest
+    needs: [ cache-key, first, second ]
+    if: needs.first.outputs.cache-hit != 'true' # will be executed only if there is a new cache entry
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Cleanup
+        run: |
+          gh extension install actions/gh-actions-cache
+          ACTIVE_KEY=${{ needs.cache-key.outputs.key }}
+          echo "Fetching list of cache key"
+          cacheKeys=$(gh actions-cache list)
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR
+          do
+            echo "Check cleanup cache for key: $cacheKey..."
+            if [$cacheKey != $ACTIVE_KEY]
+              then
+                gh actions-cache delete $cacheKey --confirm
+                echo "'$cacheKey' deleted from cache..."
+              else
+                echo "Not deleted! The key: $cachKey is the active key and will be used!"
+            fi
+          done
+          echo "Done"
+        env:
+          GH_TOKEN: ${{ github.token }}
