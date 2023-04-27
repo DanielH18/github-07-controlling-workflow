@@ -35,6 +35,9 @@ jobs:
         with:
           path: node_modules
           key: ${{ needs.cache-key.outputs.key }}
+      - name: Show cache-hit
+        run: |
+          echo "Cache-Hit: ${{ steps.cache.outputs.cache-hit }}"
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true' # will be executed only if the node_modules changed in cache
         run: npm ci
@@ -54,7 +57,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true' # will be executed only if the node_modules changed in cache
         run: npm ci
   cache-cleanup:
-    runs-on: ubunti-latest
+    runs-on: ubuntu-latest
     needs: [ cache-key, first, second ]
     if: needs.first.outputs.cache-hit != 'true' # will be executed only if there is a new cache entry
     steps:
