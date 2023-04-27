@@ -35,15 +35,14 @@ jobs:
           cacheKeys=$(gh actions-cache list)
           echo "cacheKeys: $cacheKeys"
           echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR
+          for cacheKey in $cacheKeys
           do
             echo "Check cleanup cache for key: $cacheKey..."
-            if [$cacheKey != $ACTIVE_KEY]
-              then
+            if [$cacheKey != $ACTIVE_KEY]; then
                 gh actions-cache delete $cacheKey --confirm
                 echo "'$cacheKey' deleted from cache..."
-              else
-                echo "Not deleted! The key: $cachKey is the active key and will be used!"
+            else
+              echo "Not deleted! The key: $cachKey is the active key and will be used!"
             fi
           done
           echo "Done"
