@@ -1,7 +1,6 @@
 name: Cache-Cleanup
 
-on:
-  workflow-dispatch:
+on: workflow_dispatch
 
 jobs:
   cache-key:
