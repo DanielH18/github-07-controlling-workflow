@@ -61,6 +61,8 @@ jobs:
     needs: [ cache-key, first, second ]
     if: needs.first.outputs.cache-hit != 'true' # will be executed only if there is a new cache entry
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Cleanup
         run: |
           gh extension install actions/gh-actions-cache
