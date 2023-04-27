@@ -3,7 +3,7 @@ name: Cache-Hit-and-Cleanup
 on: workflow_dispatch
 
 env:
-  WORKFLOW_MARKER: my
+  WORKFLOW_MARKER: my1
 
 jobs:
   cache-key:

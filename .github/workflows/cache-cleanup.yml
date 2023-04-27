@@ -3,7 +3,10 @@ name: Cache-Cleanup
 on: workflow_dispatch
 
 env:
-  WORKFLOW_MARKER: my
+  WORKFLOW_MARKER: my2
+
+permissions:
+
 
 jobs:
   cache-key:
@@ -38,7 +41,7 @@ jobs:
           for cacheKey in $cacheKeys
           do
             echo "Check cleanup cache for key: $cacheKey"
-            if [[ $cacheKey != $ACTIVE_KEY ]]; then
+            if [[ $cacheKey != $ACTIVE_KEY && $cacheKey == ${{env.WORKFLOW_MARKER}}* ]]; then
               echo "Delete $cacheKey from cache..."
               gh actions-cache delete $cacheKey --confirm
               echo "'$cacheKey' deleted from cache..."

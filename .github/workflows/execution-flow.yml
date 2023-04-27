@@ -1,6 +1,5 @@
 name: Website Deployment
-on:
-  workflow-dispatch:
+on: workflow-dispatch
 #  push:
 #    branches:
 #      - main
