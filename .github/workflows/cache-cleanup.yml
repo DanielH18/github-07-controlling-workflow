@@ -2,11 +2,10 @@ name: Cache-Cleanup
 
 on: workflow_dispatch
 
+permissions: write-all
+
 env:
   WORKFLOW_MARKER: my2
-
-permissions:
-
 
 jobs:
   cache-key:
